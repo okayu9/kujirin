@@ -12,8 +12,11 @@ const DISTINCT_COLORS = [
 // Single color for 7+ participants
 const UNIFIED_COLOR = '#e53935' // red
 
+// Threshold for switching to unified color mode
+const COLOR_THRESHOLD = DISTINCT_COLORS.length + 1 // 7
+
 export function getParticipantColor(index: number, totalParticipants: number): string {
-  if (totalParticipants >= 7) {
+  if (totalParticipants >= COLOR_THRESHOLD) {
     return UNIFIED_COLOR
   }
   return DISTINCT_COLORS[index % DISTINCT_COLORS.length]
@@ -21,18 +24,12 @@ export function getParticipantColor(index: number, totalParticipants: number): s
 
 export function getParticipantColorMap(participants: string[]): Map<string, string> {
   const colorMap = new Map<string, string>()
-  const useUnifiedColor = participants.length >= 7
-
   participants.forEach((participant, index) => {
-    if (useUnifiedColor) {
-      colorMap.set(participant, UNIFIED_COLOR)
-    } else {
-      colorMap.set(participant, DISTINCT_COLORS[index % DISTINCT_COLORS.length])
-    }
+    colorMap.set(participant, getParticipantColor(index, participants.length))
   })
   return colorMap
 }
 
 export function shouldUseColors(participantCount: number): boolean {
-  return participantCount < 7
+  return participantCount < COLOR_THRESHOLD
 }
