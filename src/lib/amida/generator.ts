@@ -2,6 +2,15 @@ import { randInt } from '../crypto'
 import type { LadderData, Rung } from './ladder'
 import { generatePermutation } from './shuffle'
 
+// Generation parameters
+const EXTRA_PAIRS_MULTIPLIER = 3 // extraPairs = n * this
+const REWRITE_STEPS_MULTIPLIER = 5000 // rewriteSteps = n * this
+const MIN_SAME_COLUMN_GAP_ROWS = 2 // minimum rows between same-column rungs
+const ROW_STEP_CHOICES = [1, 1, 2, 2, 3] // random step sizes for visual variety
+
+// MCMC rewrite probabilities (out of 100)
+const COMMUTATION_PROBABILITY = 65 // probability of trying commutation vs braid
+
 /**
  * Invert permutation: given perm[start]=goal, return inv where inv[goal]=start
  */
@@ -86,7 +95,7 @@ function randomRewriteMcmc(swaps: number[], steps: number = 50000): number[] {
     const r = randInt(100)
     const L = out.length
 
-    if (r < 65 && L >= 2) {
+    if (r < COMMUTATION_PROBABILITY && L >= 2) {
       // Try commutation on a random adjacent pair
       const k = randInt(L - 1)
       const a = out[k]
@@ -121,8 +130,8 @@ function randomRewriteMcmc(swaps: number[], steps: number = 50000): number[] {
  */
 function assignRows(
   swapIndices: number[],
-  minSameIGapRows: number = 2,
-  rowStepChoices: number[] = [1, 1, 2, 2, 3]
+  minSameIGapRows: number = MIN_SAME_COLUMN_GAP_ROWS,
+  rowStepChoices: number[] = ROW_STEP_CHOICES
 ): Rung[] {
   const rungs: Rung[] = []
   const lastRowForI: Map<number, number> = new Map()
@@ -184,12 +193,9 @@ export function generateAmida(n: number): LadderData {
     }
   }
 
-  // Parameters (scaled by n for balance)
-  // extraPairs: adds visual complexity without changing the result
-  // Keep it proportional to n so small groups don't get overly long ladders
-  const extraPairs = n * 3
-  const rewriteSteps = n * 5000
-  const minSameIGapRows = 2
+  // Parameters scaled by n for balance
+  const extraPairs = n * EXTRA_PAIRS_MULTIPLIER
+  const rewriteSteps = n * REWRITE_STEPS_MULTIPLIER
 
   // 1) Fairness core: uniform random permutation
   const targetPerm = generatePermutation(n)
@@ -204,7 +210,7 @@ export function generateAmida(n: number): LadderData {
   swaps = randomRewriteMcmc(swaps, rewriteSteps)
 
   // 5) Assign rows for drawing
-  const sparseRungs = assignRows(swaps, minSameIGapRows)
+  const sparseRungs = assignRows(swaps)
 
   // Normalize row numbers to be consecutive (0, 1, 2, ...)
   // This is important because getEndColumn iterates through rows sequentially
