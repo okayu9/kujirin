@@ -13,10 +13,20 @@ interface AmidaPreviewProps {
   onColumnClick: (columnIndex: number) => void
 }
 
+// Preview-specific layout constants
 const LINE_HEIGHT = 200
 const HIDDEN_BOX_HEIGHT = 140
 const LABEL_BOX_WIDTH = 70
 const LABEL_BOX_HEIGHT_MIN = 32
+const SHADOW_OFFSET = 2
+const BOX_BORDER_RADIUS = 12
+const LINE_SPACING = 12
+const TOP_LABEL_BASE_HEIGHT = 12
+const BOTTOM_LABEL_BASE_HEIGHT = 8
+const VERTICAL_LINE_START_OFFSET = 10
+const BOTTOM_LABEL_OFFSET = 18
+const SVG_EXTRA_HEIGHT = 40
+const BOX_HORIZONTAL_PADDING = 10
 
 export function AmidaPreview({
   columnCount,
@@ -25,11 +35,11 @@ export function AmidaPreview({
   onColumnClick,
 }: AmidaPreviewProps) {
   const svgWidth = columnCount * COLUMN_WIDTH + PADDING_X * 2
-  const svgHeight = LINE_HEIGHT + LABEL_HEIGHT * 2 + 40
+  const svgHeight = LINE_HEIGHT + LABEL_HEIGHT * 2 + SVG_EXTRA_HEIGHT
 
-  const boxLeft = PADDING_X - 10
-  const boxWidth = columnCount * COLUMN_WIDTH + 20
-  const boxTop = LABEL_HEIGHT + 10 + (LINE_HEIGHT - HIDDEN_BOX_HEIGHT) / 2
+  const boxLeft = PADDING_X - BOX_HORIZONTAL_PADDING
+  const boxWidth = columnCount * COLUMN_WIDTH + BOX_HORIZONTAL_PADDING * 2
+  const boxTop = LABEL_HEIGHT + VERTICAL_LINE_START_OFFSET + (LINE_HEIGHT - HIDDEN_BOX_HEIGHT) / 2
 
   return (
     <div
@@ -56,9 +66,9 @@ export function AmidaPreview({
             <line
               key={`line-${i}`}
               x1={x}
-              y1={LABEL_HEIGHT + 10}
+              y1={LABEL_HEIGHT + VERTICAL_LINE_START_OFFSET}
               x2={x}
-              y2={LABEL_HEIGHT + 10 + LINE_HEIGHT}
+              y2={LABEL_HEIGHT + VERTICAL_LINE_START_OFFSET + LINE_HEIGHT}
               stroke="#92400e"
               strokeWidth={3}
               strokeLinecap="round"
@@ -68,11 +78,11 @@ export function AmidaPreview({
 
         {/* Hidden box with shadow */}
         <rect
-          x={boxLeft + 4}
-          y={boxTop + 4}
+          x={boxLeft + SHADOW_OFFSET * 2}
+          y={boxTop + SHADOW_OFFSET * 2}
           width={boxWidth}
           height={HIDDEN_BOX_HEIGHT}
-          rx={12}
+          rx={BOX_BORDER_RADIUS}
           fill="rgba(0,0,0,0.1)"
         />
         <rect
@@ -80,7 +90,7 @@ export function AmidaPreview({
           y={boxTop}
           width={boxWidth}
           height={HIDDEN_BOX_HEIGHT}
-          rx={12}
+          rx={BOX_BORDER_RADIUS}
           fill="url(#boxGradient)"
           stroke="#d97706"
           strokeWidth={2}
@@ -109,8 +119,8 @@ export function AmidaPreview({
         const assigned = assignments.get(i)
         const topLines = splitTextToLines(assigned || 'クリック')
         const bottomLines = splitTextToLines(rewards[i])
-        const topBoxHeight = Math.max(LABEL_BOX_HEIGHT_MIN, 12 + topLines.length * 12)
-        const bottomBoxHeight = Math.max(LABEL_BOX_HEIGHT_MIN, 8 + bottomLines.length * 12)
+        const topBoxHeight = Math.max(LABEL_BOX_HEIGHT_MIN, TOP_LABEL_BASE_HEIGHT + topLines.length * LINE_SPACING)
+        const bottomBoxHeight = Math.max(LABEL_BOX_HEIGHT_MIN, BOTTOM_LABEL_BASE_HEIGHT + bottomLines.length * LINE_SPACING)
 
         return (
           <div key={`labels-${i}`}>
@@ -138,9 +148,9 @@ export function AmidaPreview({
               <div
                 className="absolute rounded-lg bg-black/10"
                 style={{
-                  left: 2,
-                  top: 2,
-                  width: LABEL_BOX_WIDTH - 4,
+                  left: SHADOW_OFFSET,
+                  top: SHADOW_OFFSET,
+                  width: LABEL_BOX_WIDTH - SHADOW_OFFSET * 2,
                   height: topBoxHeight,
                 }}
               />
@@ -175,7 +185,7 @@ export function AmidaPreview({
               className="absolute select-none"
               style={{
                 left: centerX - LABEL_BOX_WIDTH / 2,
-                top: LABEL_HEIGHT + LINE_HEIGHT + 18,
+                top: LABEL_HEIGHT + LINE_HEIGHT + BOTTOM_LABEL_OFFSET,
                 width: LABEL_BOX_WIDTH,
                 height: bottomBoxHeight,
               }}
