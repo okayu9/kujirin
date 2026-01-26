@@ -2,6 +2,19 @@ import type { KeyboardEvent } from 'react'
 import { LINE_SPACING } from '../lib/layout'
 import { splitTextToLines } from '../lib/text'
 
+// Label box dimensions
+const BOX_WIDTH = 70
+const BOX_HALF_WIDTH = BOX_WIDTH / 2
+const SHADOW_OFFSET = 2
+const PARTICIPANT_BORDER_RADIUS = 8
+const REWARD_BORDER_RADIUS = 6
+
+// Vertical padding/offset for text positioning
+const PARTICIPANT_BOX_BASE_HEIGHT = 12
+const REWARD_BOX_BASE_HEIGHT = 8
+const PARTICIPANT_TEXT_OFFSET_Y = 13
+const REWARD_TEXT_OFFSET_Y = 12
+
 interface AmidaLabelProps {
   x: number
   y: number
@@ -26,8 +39,10 @@ export function AmidaLabel({
   isClickable = false,
 }: AmidaLabelProps) {
   const lines = splitTextToLines(text)
-  const boxHeight = (variant === 'participant' ? 12 : 8) + lines.length * LINE_SPACING
-  const textStartY = y + (variant === 'participant' ? 13 : 12)
+  const isParticipant = variant === 'participant'
+  const baseHeight = isParticipant ? PARTICIPANT_BOX_BASE_HEIGHT : REWARD_BOX_BASE_HEIGHT
+  const boxHeight = baseHeight + lines.length * LINE_SPACING
+  const textStartY = y + (isParticipant ? PARTICIPANT_TEXT_OFFSET_Y : REWARD_TEXT_OFFSET_Y)
 
   const handleKeyDown = (e: KeyboardEvent<SVGGElement>) => {
     if (isClickable && onClick && (e.key === 'Enter' || e.key === ' ')) {
@@ -36,7 +51,7 @@ export function AmidaLabel({
     }
   }
 
-  if (variant === 'participant') {
+  if (isParticipant) {
     const fillColor = isRevealed
       ? '#dcfce7'
       : participantColor
@@ -56,19 +71,19 @@ export function AmidaLabel({
         <title>{title}</title>
         {/* Shadow */}
         <rect
-          x={x - 33}
-          y={y + 2}
-          width={66}
+          x={x - BOX_HALF_WIDTH + SHADOW_OFFSET}
+          y={y + SHADOW_OFFSET}
+          width={BOX_WIDTH - SHADOW_OFFSET * 2}
           height={boxHeight}
-          rx={8}
+          rx={PARTICIPANT_BORDER_RADIUS}
           fill="rgba(0,0,0,0.1)"
         />
         <rect
-          x={x - 35}
+          x={x - BOX_HALF_WIDTH}
           y={y}
-          width={70}
+          width={BOX_WIDTH}
           height={boxHeight}
-          rx={8}
+          rx={PARTICIPANT_BORDER_RADIUS}
           fill={fillColor}
           stroke={strokeColor}
           strokeWidth={2}
@@ -89,11 +104,11 @@ export function AmidaLabel({
     <g>
       <title>{title}</title>
       <rect
-        x={x - 35}
+        x={x - BOX_HALF_WIDTH}
         y={y}
-        width={70}
+        width={BOX_WIDTH}
         height={boxHeight}
-        rx={6}
+        rx={REWARD_BORDER_RADIUS}
         fill="#f0fdf4"
         stroke="#86efac"
         strokeWidth={1}
