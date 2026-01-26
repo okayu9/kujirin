@@ -25,6 +25,9 @@ interface AmidaViewProps {
 
 const MIN_ROWS = 6
 
+const getColumnX = (index: number) =>
+  PADDING_X + index * COLUMN_WIDTH + COLUMN_WIDTH / 2
+
 export function AmidaView({
   ladder,
   rewards,
@@ -43,9 +46,6 @@ export function AmidaView({
   const svgWidth = columnCount * COLUMN_WIDTH + PADDING_X * 2
   const lineHeight = rowCount * ROW_HEIGHT + 40
   const svgHeight = lineHeight + LABEL_HEIGHT * 2 + 40
-
-  const getColumnX = (index: number) =>
-    PADDING_X + index * COLUMN_WIDTH + COLUMN_WIDTH / 2
 
   return (
     <svg
