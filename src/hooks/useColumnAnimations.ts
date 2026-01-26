@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 
 interface UseColumnAnimationsOptions {
   participantColors: Map<string, string>
@@ -15,7 +15,6 @@ export function useColumnAnimations({
 }: UseColumnAnimationsOptions) {
   const [animatingColumns, setAnimatingColumns] = useState<Map<number, string>>(new Map())
   const [completedBalls, setCompletedBalls] = useState<Map<number, string>>(new Map())
-  const pendingRevealsRef = useRef<number[]>([])
 
   const getParticipantColor = useCallback(
     (columnIndex: number): string => {
@@ -54,15 +53,8 @@ export function useColumnAnimations({
       })
 
       onReveal(columnIndex)
-
-      // Process next pending reveal
-      const nextColumn = pendingRevealsRef.current.shift()
-      if (nextColumn !== undefined && !revealedColumns.has(nextColumn) && assignments.has(nextColumn)) {
-        const color = getParticipantColor(nextColumn)
-        setAnimatingColumns((prev) => new Map(prev).set(nextColumn, color))
-      }
     },
-    [onReveal, revealedColumns, assignments, getParticipantColor]
+    [onReveal]
   )
 
   const startAllAnimations = useCallback(() => {
