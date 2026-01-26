@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useId } from 'react'
 import type { ValidationError } from '../lib/validation'
 
 interface ListInputProps {
@@ -22,6 +22,9 @@ export function ListInput({
 }: ListInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const lineNumbersRef = useRef<HTMLDivElement>(null)
+  const id = useId()
+  const textareaId = `${id}-textarea`
+  const errorId = `${id}-errors`
 
   const lines = value.split('\n')
   const lineCount = Math.max(lines.length, 1)
@@ -39,13 +42,14 @@ export function ListInput({
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="flex items-center gap-2 font-bold text-gray-700">
+      <label htmlFor={textareaId} className="flex items-center gap-2 font-bold text-gray-700">
         {icon && <span className="text-lg">{icon}</span>}
         {label}
       </label>
       <div className="flex border-2 border-amber-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-orange-400 focus-within:border-orange-400 bg-white shadow-sm">
         <div
           ref={lineNumbersRef}
+          aria-hidden="true"
           className="bg-amber-50 text-amber-400 text-right px-3 py-3 select-none overflow-hidden font-mono text-sm leading-6"
           style={{ minWidth: '2.5rem' }}
         >
@@ -66,17 +70,24 @@ export function ListInput({
           })}
         </div>
         <textarea
+          id={textareaId}
           ref={textareaRef}
           value={value}
           onChange={handleChange}
           onScroll={syncScroll}
           placeholder={placeholder}
+          aria-describedby={errors.length > 0 ? errorId : undefined}
           className="flex-1 p-3 resize-none outline-none font-mono text-sm leading-6 min-h-[150px] placeholder:text-gray-300"
           rows={6}
         />
       </div>
       {errors.length > 0 && (
-        <ul className="text-red-500 text-sm space-y-1 bg-red-50 rounded-lg p-3">
+        <ul
+          id={errorId}
+          role="alert"
+          aria-live="polite"
+          className="text-red-500 text-sm space-y-1 bg-red-50 rounded-lg p-3"
+        >
           {errors.map((error, i) => (
             <li key={i} className="flex items-start gap-2">
               <span className="shrink-0">•</span>
