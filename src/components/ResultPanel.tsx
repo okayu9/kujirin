@@ -40,6 +40,12 @@ export function ResultPanel({
 
   const hasRevealedResults = revealedParticipants.size > 0
 
+  const useColors = shouldUseColors(participants.length)
+  const participantColorList = useMemo(
+    () => participants.map((_, index) => getParticipantColor(index, participants.length)),
+    [participants]
+  )
+
   return (
     <div className="bg-gradient-card border-2 border-amber-200 rounded-2xl p-5 card-shadow">
       <div className="flex justify-between items-center mb-4">
@@ -70,8 +76,7 @@ export function ResultPanel({
           {participants.map((participant, index) => {
             const reward = results.get(participant)
             const isRevealed = revealedParticipants.has(participant)
-            const useColors = shouldUseColors(participants.length)
-            const color = getParticipantColor(index, participants.length)
+            const color = participantColorList[index]
 
             return (
               <div
