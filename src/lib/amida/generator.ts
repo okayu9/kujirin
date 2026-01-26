@@ -1,18 +1,6 @@
 import { randInt } from '../crypto'
 import type { LadderData, Rung } from './ladder'
-
-/**
- * Fisher-Yates shuffle for uniform random permutation
- * Returns perm where perm[start] = goal
- */
-function fisherYatesPerm(n: number): number[] {
-  const a = Array.from({ length: n }, (_, i) => i)
-  for (let k = n - 1; k > 0; k--) {
-    const j = randInt(k + 1)
-    ;[a[k], a[j]] = [a[j], a[k]]
-  }
-  return a
-}
+import { generatePermutation } from './shuffle'
 
 /**
  * Invert permutation: given perm[start]=goal, return inv where inv[goal]=start
@@ -204,7 +192,7 @@ export function generateAmida(n: number): LadderData {
   const minSameIGapRows = 2
 
   // 1) Fairness core: uniform random permutation
-  const targetPerm = fisherYatesPerm(n)
+  const targetPerm = generatePermutation(n)
 
   // 2) Minimal swap list realizing exactly the mapping
   let swaps = permToSwapList(targetPerm)
