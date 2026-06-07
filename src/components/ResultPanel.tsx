@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { getParticipantColor, shouldUseColors } from '../lib/colors'
 
 interface ResultPanelProps {
@@ -14,6 +14,8 @@ export function ResultPanel({
   revealedColumns,
   assignments,
 }: ResultPanelProps) {
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'success' | 'error'>('idle')
+
   const revealedParticipants = useMemo(() => {
     const set = new Set<string>()
     for (const columnIndex of revealedColumns) {
@@ -25,7 +27,9 @@ export function ResultPanel({
     return set
   }, [revealedColumns, assignments])
 
-  const handleCopy = useCallback(() => {
+  const handleCopy = useCallback(async () => {
+    setCopyStatus('idle')
+
     const lines: string[] = []
     for (const participant of participants) {
       const reward = results.get(participant)
@@ -33,9 +37,13 @@ export function ResultPanel({
         lines.push(`${participant} → ${reward}`)
       }
     }
-    navigator.clipboard.writeText(lines.join('\n'))?.catch(() => {
-      // Clipboard API may fail in insecure contexts or when denied permission
-    })
+
+    try {
+      await navigator.clipboard.writeText(lines.join('\n'))
+      setCopyStatus('success')
+    } catch {
+      setCopyStatus('error')
+    }
   }, [participants, results, revealedParticipants])
 
   const hasRevealedResults = revealedParticipants.size > 0
@@ -54,12 +62,22 @@ export function ResultPanel({
           結果発表
         </h3>
         {hasRevealedResults && (
-          <button
-            onClick={handleCopy}
-            className="px-4 py-2 text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg transition-colors font-medium flex items-center gap-1"
-          >
-            <span aria-hidden="true">📋</span> コピー
-          </button>
+          <div className="flex flex-col items-end gap-1">
+            <button
+              onClick={handleCopy}
+              className="px-4 py-2 text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg transition-colors font-medium flex items-center gap-1"
+            >
+              <span aria-hidden="true">📋</span> コピー
+            </button>
+            <div aria-live="polite" className="min-h-4 text-xs">
+              {copyStatus === 'success' && (
+                <span className="text-green-600">コピーしました</span>
+              )}
+              {copyStatus === 'error' && (
+                <span className="text-red-500">コピーできませんでした</span>
+              )}
+            </div>
+          </div>
         )}
       </div>
 

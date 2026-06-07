@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { ResultPanel } from './ResultPanel'
 
 describe('ResultPanel', () => {
@@ -9,6 +9,7 @@ describe('ResultPanel', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockClipboard.writeText.mockResolvedValue(undefined)
   })
 
   const defaultProps = {
@@ -60,6 +61,25 @@ describe('ResultPanel', () => {
     render(<ResultPanel {...defaultProps} revealedColumns={new Set([0, 1])} />)
     const copyButton = screen.getByRole('button', { name: 'コピー' })
     fireEvent.click(copyButton)
-    expect(mockClipboard.writeText).toHaveBeenCalledWith('Alice → 賞品A\nBob → 賞品B')
+    await waitFor(() => {
+      expect(mockClipboard.writeText).toHaveBeenCalledWith('Alice → 賞品A\nBob → 賞品B')
+    })
+  })
+
+  it('shows copy success feedback', async () => {
+    render(<ResultPanel {...defaultProps} revealedColumns={new Set([0])} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'コピー' }))
+
+    expect(await screen.findByText('コピーしました')).toBeInTheDocument()
+  })
+
+  it('shows copy error feedback', async () => {
+    mockClipboard.writeText.mockRejectedValue(new Error('denied'))
+    render(<ResultPanel {...defaultProps} revealedColumns={new Set([0])} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'コピー' }))
+
+    expect(await screen.findByText('コピーできませんでした')).toBeInTheDocument()
   })
 })
