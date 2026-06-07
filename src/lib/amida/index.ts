@@ -4,8 +4,11 @@ export {
   generateLadder,
   tracePath,
   getEndColumn,
+  validateLadder,
+  assertValidLadder,
   type Rung,
   type LadderData,
+  type LadderValidationResult,
   type PathSegment,
 } from './ladder'
 export { generateAmida, type GenerateAmidaOptions } from './generator'

@@ -6,6 +6,8 @@ import {
   getEndColumn,
   generateAmida,
   tracePath,
+  validateLadder,
+  assertValidLadder,
 } from './index'
 
 function createSeededRandomInt(seed: number) {
@@ -103,6 +105,29 @@ describe('generateLadder', () => {
     for (let i = 0; i < 3; i++) {
       expect(getEndColumn(ladder, i)).toBe(i)
     }
+  })
+
+  it('validates generated ladder invariants', () => {
+    const ladder = generateLadder([2, 0, 3, 1])
+
+    expect(validateLadder(ladder)).toEqual({ valid: true, errors: [] })
+    expect(() => assertValidLadder(ladder)).not.toThrow()
+  })
+
+  it('reports invalid ladder invariants', () => {
+    const result = validateLadder({
+      columns: 3,
+      rows: 1,
+      rungs: [
+        { column: 0, row: 0 },
+        { column: 1, row: 0 },
+      ],
+      permutation: [0, 0, 2],
+    })
+
+    expect(result.valid).toBe(false)
+    expect(result.errors).toContain('permutation must contain each column index exactly once')
+    expect(result.errors).toContain('row 0 has colliding adjacent rungs')
   })
 })
 

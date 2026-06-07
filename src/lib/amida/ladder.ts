@@ -10,6 +10,25 @@ export interface LadderData {
   permutation: number[] // permutation[startColumn] = endColumn
 }
 
+export interface LadderValidationResult {
+  valid: boolean
+  errors: string[]
+}
+
+function isValidPermutation(permutation: number[], columns: number): boolean {
+  if (permutation.length !== columns) return false
+
+  const seen = new Set<number>()
+  for (const value of permutation) {
+    if (!Number.isInteger(value) || value < 0 || value >= columns || seen.has(value)) {
+      return false
+    }
+    seen.add(value)
+  }
+
+  return true
+}
+
 export function permutationToSwaps(permutation: number[]): [number, number][] {
   const n = permutation.length
   const current = [...permutation]
@@ -159,4 +178,62 @@ export function getEndColumn(ladder: LadderData, startColumn: number): number {
   }
 
   return currentColumn
+}
+
+export function validateLadder(ladder: LadderData): LadderValidationResult {
+  const errors: string[] = []
+
+  if (!Number.isInteger(ladder.columns) || ladder.columns < 0) {
+    errors.push('columns must be a non-negative integer')
+  }
+
+  if (!Number.isInteger(ladder.rows) || ladder.rows < 0) {
+    errors.push('rows must be a non-negative integer')
+  }
+
+  if (!isValidPermutation(ladder.permutation, ladder.columns)) {
+    errors.push('permutation must contain each column index exactly once')
+  }
+
+  for (const rung of ladder.rungs) {
+    if (!Number.isInteger(rung.column) || rung.column < 0 || rung.column >= ladder.columns - 1) {
+      errors.push(`rung column ${rung.column} is out of range`)
+    }
+    if (!Number.isInteger(rung.row) || rung.row < 0 || rung.row >= ladder.rows) {
+      errors.push(`rung row ${rung.row} is out of range`)
+    }
+  }
+
+  const rungsByRow = buildRungsByRow(ladder.rungs)
+  for (const [row, rungs] of rungsByRow) {
+    const columns = rungs.map((rung) => rung.column).sort((a, b) => a - b)
+    for (let i = 1; i < columns.length; i++) {
+      if (columns[i] - columns[i - 1] <= 1) {
+        errors.push(`row ${row} has colliding adjacent rungs`)
+      }
+    }
+  }
+
+  if (isValidPermutation(ladder.permutation, ladder.columns)) {
+    for (let startColumn = 0; startColumn < ladder.columns; startColumn++) {
+      const endColumn = getEndColumn(ladder, startColumn)
+      if (endColumn !== ladder.permutation[startColumn]) {
+        errors.push(
+          `path from column ${startColumn} ends at ${endColumn}, expected ${ladder.permutation[startColumn]}`
+        )
+      }
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  }
+}
+
+export function assertValidLadder(ladder: LadderData): void {
+  const result = validateLadder(ladder)
+  if (!result.valid) {
+    throw new Error(`Invalid ladder data: ${result.errors.join('; ')}`)
+  }
 }

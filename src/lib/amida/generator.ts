@@ -1,5 +1,5 @@
 import { randInt } from '../crypto'
-import type { LadderData, Rung } from './ladder'
+import { assertValidLadder, type LadderData, type Rung } from './ladder'
 import { generatePermutation, type RandomInt } from './shuffle'
 
 // Generation parameters
@@ -187,7 +187,11 @@ function assignRows(
 }
 
 /**
- * Generate a fair and natural-looking amidakuji
+ * Generate a fair and natural-looking amidakuji.
+ *
+ * Unlike generateLadder, this creates a visually fuller ladder by adding
+ * identity-preserving swap pairs and random rewrites after choosing the fair
+ * target permutation.
  */
 export interface GenerateAmidaOptions {
   randomInt?: RandomInt
@@ -240,10 +244,13 @@ export function generateAmida(
     row: rowMap.get(r.row) ?? r.row,
   }))
 
-  return {
+  const ladder = {
     columns: n,
     rows: usedRows.length,
     rungs,
     permutation: targetPerm,
   }
+
+  assertValidLadder(ladder)
+  return ladder
 }
