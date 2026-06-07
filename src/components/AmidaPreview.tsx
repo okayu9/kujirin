@@ -3,8 +3,16 @@ import {
   COLUMN_WIDTH,
   PADDING_X,
   LABEL_HEIGHT,
+  getAmidaSvgWidth,
+  getColumnX,
 } from '../lib/layout'
-import { splitTextToLines } from '../lib/text'
+import {
+  LABEL_BOX_MIN_HEIGHT,
+  LABEL_BOX_WIDTH,
+  LABEL_SHADOW_OFFSET,
+  getLabelBoxHeight,
+  getLabelLines,
+} from '../lib/amidaLabel'
 
 interface AmidaPreviewProps {
   columnCount: number
@@ -16,13 +24,7 @@ interface AmidaPreviewProps {
 // Preview-specific layout constants
 const LINE_HEIGHT = 200
 const HIDDEN_BOX_HEIGHT = 140
-const LABEL_BOX_WIDTH = 70
-const LABEL_BOX_HEIGHT_MIN = 32
-const SHADOW_OFFSET = 2
 const BOX_BORDER_RADIUS = 12
-const LINE_SPACING = 12
-const TOP_LABEL_BASE_HEIGHT = 12
-const BOTTOM_LABEL_BASE_HEIGHT = 8
 const VERTICAL_LINE_START_OFFSET = 10
 const BOTTOM_LABEL_OFFSET = 18
 const SVG_EXTRA_HEIGHT = 40
@@ -34,7 +36,7 @@ export function AmidaPreview({
   assignments,
   onColumnClick,
 }: AmidaPreviewProps) {
-  const svgWidth = columnCount * COLUMN_WIDTH + PADDING_X * 2
+  const svgWidth = getAmidaSvgWidth(columnCount)
   const svgHeight = LINE_HEIGHT + LABEL_HEIGHT * 2 + SVG_EXTRA_HEIGHT
 
   const boxLeft = PADDING_X - BOX_HORIZONTAL_PADDING
@@ -61,7 +63,7 @@ export function AmidaPreview({
 
         {/* Vertical lines */}
         {Array.from({ length: columnCount }, (_, i) => {
-          const x = PADDING_X + i * COLUMN_WIDTH + COLUMN_WIDTH / 2
+          const x = getColumnX(i)
           return (
             <line
               key={`line-${i}`}
@@ -78,8 +80,8 @@ export function AmidaPreview({
 
         {/* Hidden box with shadow */}
         <rect
-          x={boxLeft + SHADOW_OFFSET * 2}
-          y={boxTop + SHADOW_OFFSET * 2}
+          x={boxLeft + LABEL_SHADOW_OFFSET * 2}
+          y={boxTop + LABEL_SHADOW_OFFSET * 2}
           width={boxWidth}
           height={HIDDEN_BOX_HEIGHT}
           rx={BOX_BORDER_RADIUS}
@@ -115,12 +117,17 @@ export function AmidaPreview({
 
       {/* HTML labels */}
       {Array.from({ length: columnCount }, (_, i) => {
-        const centerX = PADDING_X + i * COLUMN_WIDTH + COLUMN_WIDTH / 2
+        const centerX = getColumnX(i)
         const assigned = assignments.get(i)
-        const topLines = splitTextToLines(assigned || 'クリック')
-        const bottomLines = splitTextToLines(rewards[i])
-        const topBoxHeight = Math.max(LABEL_BOX_HEIGHT_MIN, TOP_LABEL_BASE_HEIGHT + topLines.length * LINE_SPACING)
-        const bottomBoxHeight = Math.max(LABEL_BOX_HEIGHT_MIN, BOTTOM_LABEL_BASE_HEIGHT + bottomLines.length * LINE_SPACING)
+        const topText = assigned || 'クリック'
+        const topLines = getLabelLines(topText)
+        const bottomLines = getLabelLines(rewards[i])
+        const topBoxHeight = getLabelBoxHeight(topText, 'participant', {
+          minHeight: LABEL_BOX_MIN_HEIGHT,
+        })
+        const bottomBoxHeight = getLabelBoxHeight(rewards[i], 'reward', {
+          minHeight: LABEL_BOX_MIN_HEIGHT,
+        })
 
         return (
           <div key={`labels-${i}`}>
@@ -148,9 +155,9 @@ export function AmidaPreview({
               <div
                 className="absolute rounded-lg bg-black/10"
                 style={{
-                  left: SHADOW_OFFSET,
-                  top: SHADOW_OFFSET,
-                  width: LABEL_BOX_WIDTH - SHADOW_OFFSET * 2,
+                  left: LABEL_SHADOW_OFFSET,
+                  top: LABEL_SHADOW_OFFSET,
+                  width: LABEL_BOX_WIDTH - LABEL_SHADOW_OFFSET * 2,
                   height: topBoxHeight,
                 }}
               />

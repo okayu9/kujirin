@@ -1,5 +1,6 @@
 import { useReducer } from 'react'
 import type { AppState, AppAction } from '../types'
+import { assignParticipant, unassignColumn } from '../lib/assignments'
 
 export const initialState: AppState = {
   phase: 'input',
@@ -59,21 +60,18 @@ function appReducer(state: AppState, action: AppAction): AppState {
       }
 
     case 'ASSIGN_ENTRY': {
-      const newAssignments = new Map(state.assignments)
-      // Remove any existing assignment for this participant
-      for (const [columnIndex, participant] of newAssignments) {
-        if (participant === action.payload.participantName) {
-          newAssignments.delete(columnIndex)
-        }
+      const { columnIndex, participantName } = action.payload
+      return {
+        ...state,
+        assignments: assignParticipant(state.assignments, columnIndex, participantName),
       }
-      newAssignments.set(action.payload.columnIndex, action.payload.participantName)
-      return { ...state, assignments: newAssignments }
     }
 
     case 'UNASSIGN_ENTRY': {
-      const newAssignments = new Map(state.assignments)
-      newAssignments.delete(action.payload.columnIndex)
-      return { ...state, assignments: newAssignments }
+      return {
+        ...state,
+        assignments: unassignColumn(state.assignments, action.payload.columnIndex),
+      }
     }
 
     case 'ASSIGN_RANDOM':

@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState, useMemo } from 'react'
-import type { LadderData } from '../lib/amida'
-import { COLUMN_WIDTH, PADDING_X, LABEL_HEIGHT, ROW_HEIGHT } from '../lib/layout'
+import { tracePath, type LadderData } from '../lib/amida'
+import { VERTICAL_LINE_START_Y, getColumnX, getRungY } from '../lib/layout'
 
 interface BallAnimationProps {
   ladder: LadderData
@@ -38,49 +38,24 @@ export function BallAnimation({
 
   // Calculate path once
   const { path, segmentLengths, totalLength } = useMemo(() => {
-    const getColumnX = (col: number) =>
-      PADDING_X + col * COLUMN_WIDTH + COLUMN_WIDTH / 2
-
-    const startY = LABEL_HEIGHT + 10
-    const endY = LABEL_HEIGHT + 10 + lineHeight
-    const getRungY = (row: number) => LABEL_HEIGHT + 30 + row * ROW_HEIGHT
-
-    // Group rungs by row
-    const rungsByRow = new Map<number, { column: number }[]>()
-    for (const rung of ladder.rungs) {
-      const rowRungs = rungsByRow.get(rung.row)
-      if (rowRungs) {
-        rowRungs.push(rung)
-      } else {
-        rungsByRow.set(rung.row, [rung])
-      }
-    }
-
-    // Build path
+    const startY = VERTICAL_LINE_START_Y
+    const endY = VERTICAL_LINE_START_Y + lineHeight
+    const pathSegments = tracePath(ladder, startColumn)
     const path: Point[] = []
-    let currentColumn = startColumn
 
-    path.push({ x: getColumnX(currentColumn), y: startY })
+    path.push({ x: getColumnX(startColumn), y: startY })
 
-    for (let row = 0; row < ladder.rows; row++) {
-      const rungY = getRungY(row)
-      const rowRungs = rungsByRow.get(row) || []
+    for (const segment of pathSegments) {
+      if (segment.direction === 'down') continue
 
-      const rungToRight = rowRungs.find((r) => r.column === currentColumn)
-      const rungToLeft = rowRungs.find((r) => r.column === currentColumn - 1)
+      const rungY = getRungY(segment.row)
 
-      if (rungToRight) {
-        path.push({ x: getColumnX(currentColumn), y: rungY })
-        currentColumn = currentColumn + 1
-        path.push({ x: getColumnX(currentColumn), y: rungY })
-      } else if (rungToLeft) {
-        path.push({ x: getColumnX(currentColumn), y: rungY })
-        currentColumn = currentColumn - 1
-        path.push({ x: getColumnX(currentColumn), y: rungY })
-      }
+      path.push({ x: getColumnX(segment.startColumn), y: rungY })
+      path.push({ x: getColumnX(segment.endColumn), y: rungY })
     }
 
-    path.push({ x: getColumnX(currentColumn), y: endY })
+    const endColumn = pathSegments.at(-1)?.endColumn ?? startColumn
+    path.push({ x: getColumnX(endColumn), y: endY })
 
     // Calculate segment lengths
     let totalLength = 0

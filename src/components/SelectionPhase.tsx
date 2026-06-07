@@ -1,8 +1,10 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useAppContext } from '../hooks'
 import { fisherYatesShuffle } from '../lib/amida'
+import { createAssignmentsFromParticipants, getAssignedParticipants } from '../lib/assignments'
 import { AmidaPreview } from './AmidaPreview'
 import { AssignmentModal } from './AssignmentModal'
+import { PhaseHeader } from './PhaseHeader'
 
 export function SelectionPhase() {
   const { state, dispatch } = useAppContext()
@@ -11,7 +13,7 @@ export function SelectionPhase() {
   const allAssigned = state.assignments.size === state.participants.length
 
   const assignedParticipants = useMemo(() => {
-    return new Set(state.assignments.values())
+    return getAssignedParticipants(state.assignments)
   }, [state.assignments])
 
   const handleColumnClick = useCallback((columnIndex: number) => {
@@ -47,13 +49,7 @@ export function SelectionPhase() {
 
   const handleRandomAssign = useCallback(() => {
     const shuffled = fisherYatesShuffle(state.participants)
-
-    const newAssignments = new Map<number, string>()
-    shuffled.forEach((participant, index) => {
-      newAssignments.set(index, participant)
-    })
-
-    dispatch({ type: 'ASSIGN_RANDOM', payload: newAssignments })
+    dispatch({ type: 'ASSIGN_RANDOM', payload: createAssignmentsFromParticipants(shuffled) })
   }, [dispatch, state.participants])
 
   const handleBack = useCallback(() => {
@@ -67,16 +63,11 @@ export function SelectionPhase() {
 
   return (
     <div className="space-y-6">
-      {/* Section Header */}
-      <div className="flex items-center gap-3 pb-4 border-b border-amber-200">
-        <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center text-white font-bold shadow">
-          2
-        </div>
-        <div>
-          <h2 className="text-lg font-bold text-gray-800">スタート位置を決める</h2>
-          <p className="text-sm text-gray-500">誰がどこからスタートするか決めましょう</p>
-        </div>
-      </div>
+      <PhaseHeader
+        step={2}
+        title="スタート位置を決める"
+        description="誰がどこからスタートするか決めましょう"
+      />
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-amber-50 rounded-xl p-4">
         <div className="text-sm text-amber-800">
