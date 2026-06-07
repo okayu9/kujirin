@@ -1,4 +1,4 @@
-export { fisherYatesShuffle, generatePermutation } from './shuffle'
+export { fisherYatesShuffle, generatePermutation, type RandomInt } from './shuffle'
 export {
   permutationToSwaps,
   generateLadder,
@@ -8,4 +8,4 @@ export {
   type LadderData,
   type PathSegment,
 } from './ladder'
-export { generateAmida } from './generator'
+export { generateAmida, type GenerateAmidaOptions } from './generator'

@@ -1,10 +1,10 @@
 import { randInt } from '../crypto'
 import type { LadderData, Rung } from './ladder'
-import { generatePermutation } from './shuffle'
+import { generatePermutation, type RandomInt } from './shuffle'
 
 // Generation parameters
 const EXTRA_PAIRS_MULTIPLIER = 3 // extraPairs = n * this
-const REWRITE_STEPS_MULTIPLIER = 5000 // rewriteSteps = n * this
+const REWRITE_STEPS_MULTIPLIER = 1000 // rewriteSteps = n * this
 const MIN_SAME_COLUMN_GAP_ROWS = 2 // minimum rows between same-column rungs
 const ROW_STEP_CHOICES = [1, 1, 2, 2, 3] // random step sizes for visual variety
 
@@ -65,15 +65,16 @@ function permToSwapList(permStartToGoal: number[]): number[] {
 function insertAdjacentCancelPairs(
   swaps: number[],
   n: number,
-  extraPairs: number
+  extraPairs: number,
+  randomInt: RandomInt
 ): number[] {
   if (extraPairs <= 0) return [...swaps]
 
   const out = [...swaps]
 
   for (let p = 0; p < extraPairs; p++) {
-    const i = randInt(n - 1)
-    const pos = randInt(out.length + 1)
+    const i = randomInt(n - 1)
+    const pos = randomInt(out.length + 1)
     // Insert adjacent pair (i, i) which is identity
     out.splice(pos, 0, i, i)
   }
@@ -86,18 +87,22 @@ function insertAdjacentCancelPairs(
  * - Commutation: s_i s_j <-> s_j s_i when |i-j| > 1
  * - Braid: s_i s_{i+1} s_i <-> s_{i+1} s_i s_{i+1}
  */
-function randomRewriteMcmc(swaps: number[], steps: number = 50000): number[] {
+function randomRewriteMcmc(
+  swaps: number[],
+  steps: number,
+  randomInt: RandomInt
+): number[] {
   if (swaps.length < 2) return [...swaps]
 
   const out = [...swaps]
 
   for (let step = 0; step < steps; step++) {
-    const r = randInt(100)
+    const r = randomInt(100)
     const L = out.length
 
     if (r < COMMUTATION_PROBABILITY && L >= 2) {
       // Try commutation on a random adjacent pair
-      const k = randInt(L - 1)
+      const k = randomInt(L - 1)
       const a = out[k]
       const b = out[k + 1]
       if (Math.abs(a - b) > 1) {
@@ -106,7 +111,7 @@ function randomRewriteMcmc(swaps: number[], steps: number = 50000): number[] {
       }
     } else if (L >= 3) {
       // Try braid on a random triple
-      const k = randInt(L - 2)
+      const k = randomInt(L - 2)
       const x = out[k]
       const y = out[k + 1]
       const z = out[k + 2]
@@ -131,7 +136,8 @@ function randomRewriteMcmc(swaps: number[], steps: number = 50000): number[] {
 function assignRows(
   swapIndices: number[],
   minSameIGapRows: number = MIN_SAME_COLUMN_GAP_ROWS,
-  rowStepChoices: number[] = ROW_STEP_CHOICES
+  rowStepChoices: number[] = ROW_STEP_CHOICES,
+  randomInt: RandomInt = randInt
 ): Rung[] {
   const rungs: Rung[] = []
   const lastRowForI: Map<number, number> = new Map()
@@ -141,7 +147,7 @@ function assignRows(
 
   for (const i of swapIndices) {
     // Base progression with jitter
-    curRow += rowStepChoices[randInt(rowStepChoices.length)]
+    curRow += rowStepChoices[randomInt(rowStepChoices.length)]
 
     let row = curRow
 
@@ -183,7 +189,18 @@ function assignRows(
 /**
  * Generate a fair and natural-looking amidakuji
  */
-export function generateAmida(n: number): LadderData {
+export interface GenerateAmidaOptions {
+  randomInt?: RandomInt
+  extraPairs?: number
+  rewriteSteps?: number
+}
+
+export function generateAmida(
+  n: number,
+  options: GenerateAmidaOptions = {}
+): LadderData {
+  const randomInt = options.randomInt ?? randInt
+
   if (n < 2) {
     return {
       columns: n,
@@ -194,23 +211,23 @@ export function generateAmida(n: number): LadderData {
   }
 
   // Parameters scaled by n for balance
-  const extraPairs = n * EXTRA_PAIRS_MULTIPLIER
-  const rewriteSteps = n * REWRITE_STEPS_MULTIPLIER
+  const extraPairs = options.extraPairs ?? n * EXTRA_PAIRS_MULTIPLIER
+  const rewriteSteps = options.rewriteSteps ?? n * REWRITE_STEPS_MULTIPLIER
 
   // 1) Fairness core: uniform random permutation
-  const targetPerm = generatePermutation(n)
+  const targetPerm = generatePermutation(n, randomInt)
 
   // 2) Minimal swap list realizing exactly the mapping
   let swaps = permToSwapList(targetPerm)
 
   // 3) Add adjacent canceling pairs (these are identity, so they don't change permutation)
-  swaps = insertAdjacentCancelPairs(swaps, n, extraPairs)
+  swaps = insertAdjacentCancelPairs(swaps, n, extraPairs, randomInt)
 
   // 4) Random local rewrites to "mix" and spread out the cancel pairs
-  swaps = randomRewriteMcmc(swaps, rewriteSteps)
+  swaps = randomRewriteMcmc(swaps, rewriteSteps, randomInt)
 
   // 5) Assign rows for drawing
-  const sparseRungs = assignRows(swaps)
+  const sparseRungs = assignRows(swaps, MIN_SAME_COLUMN_GAP_ROWS, ROW_STEP_CHOICES, randomInt)
 
   // Normalize row numbers to be consecutive (0, 1, 2, ...)
   // This is important because getEndColumn iterates through rows sequentially

@@ -8,6 +8,15 @@ import {
   tracePath,
 } from './index'
 
+function createSeededRandomInt(seed: number) {
+  let state = seed >>> 0
+  return (max: number): number => {
+    if (max <= 0) return 0
+    state = (state * 1664525 + 1013904223) >>> 0
+    return state % max
+  }
+}
+
 describe('fisherYatesShuffle', () => {
   it('produces permutation of original array', () => {
     const array = [1, 2, 3, 4, 5]
@@ -24,11 +33,18 @@ describe('fisherYatesShuffle', () => {
 
     expect(array).toEqual(original)
   })
+
+  it('accepts an injected random source for deterministic shuffles', () => {
+    const array = [1, 2, 3, 4, 5]
+    const result = fisherYatesShuffle(array, createSeededRandomInt(123))
+
+    expect(result).toEqual([3, 5, 1, 2, 4])
+  })
 })
 
 describe('generatePermutation', () => {
   it('produces valid permutation', () => {
-    const perm = generatePermutation(5)
+    const perm = generatePermutation(5, createSeededRandomInt(1))
 
     expect(perm.length).toBe(5)
     expect([...perm].sort()).toEqual([0, 1, 2, 3, 4])
@@ -92,7 +108,7 @@ describe('generateLadder', () => {
 
 describe('generateAmida', () => {
   it('produces valid ladder structure', () => {
-    const ladder = generateAmida(5)
+    const ladder = generateAmida(5, { randomInt: createSeededRandomInt(10) })
 
     expect(ladder.columns).toBe(5)
     expect(ladder.permutation.length).toBe(5)
@@ -101,7 +117,7 @@ describe('generateAmida', () => {
   })
 
   it('path endpoints match permutation', () => {
-    const ladder = generateAmida(6)
+    const ladder = generateAmida(6, { randomInt: createSeededRandomInt(20) })
 
     for (let i = 0; i < 6; i++) {
       const end = getEndColumn(ladder, i)
@@ -111,7 +127,7 @@ describe('generateAmida', () => {
 
   it('handles 10 columns (max limit)', () => {
     const start = performance.now()
-    const ladder = generateAmida(10)
+    const ladder = generateAmida(10, { randomInt: createSeededRandomInt(30) })
     const elapsed = performance.now() - start
 
     // Should complete quickly
@@ -127,24 +143,23 @@ describe('generateAmida', () => {
   })
 
   it('handles small cases', () => {
-    const ladder2 = generateAmida(2)
+    const ladder2 = generateAmida(2, { randomInt: createSeededRandomInt(40) })
     expect(ladder2.columns).toBe(2)
     expect(getEndColumn(ladder2, 0)).toBe(ladder2.permutation[0])
     expect(getEndColumn(ladder2, 1)).toBe(ladder2.permutation[1])
 
-    const ladder3 = generateAmida(3)
+    const ladder3 = generateAmida(3, { randomInt: createSeededRandomInt(50) })
     expect(ladder3.columns).toBe(3)
     for (let i = 0; i < 3; i++) {
       expect(getEndColumn(ladder3, i)).toBe(ladder3.permutation[i])
     }
   })
 
-  it('produces different results on multiple calls', () => {
-    // Run multiple times and check that we get different permutations
+  it('produces different results with different random seeds', () => {
     const permutations = new Set<string>()
 
     for (let i = 0; i < 20; i++) {
-      const ladder = generateAmida(4)
+      const ladder = generateAmida(4, { randomInt: createSeededRandomInt(i + 1) })
       permutations.add(ladder.permutation.join(','))
     }
 
@@ -160,7 +175,7 @@ describe('generateAmida', () => {
   })
 
   it('rungs do not have adjacent columns at the same row', () => {
-    const ladder = generateAmida(6)
+    const ladder = generateAmida(6, { randomInt: createSeededRandomInt(60) })
 
     // Group rungs by row
     const rungsByRow = new Map<number, number[]>()
@@ -184,7 +199,7 @@ describe('generateAmida', () => {
   })
 
   it('all rungs have valid column indices', () => {
-    const ladder = generateAmida(5)
+    const ladder = generateAmida(5, { randomInt: createSeededRandomInt(70) })
 
     for (const rung of ladder.rungs) {
       expect(rung.column).toBeGreaterThanOrEqual(0)
@@ -197,7 +212,7 @@ describe('generateAmida', () => {
 
 describe('tracePath', () => {
   it('returns correct path segments', () => {
-    const ladder = generateAmida(4)
+    const ladder = generateAmida(4, { randomInt: createSeededRandomInt(80) })
     const path = tracePath(ladder, 0)
 
     // Path should have entries for each row
@@ -210,7 +225,7 @@ describe('tracePath', () => {
   })
 
   it('path ends at correct column', () => {
-    const ladder = generateAmida(5)
+    const ladder = generateAmida(5, { randomInt: createSeededRandomInt(90) })
 
     for (let start = 0; start < 5; start++) {
       const path = tracePath(ladder, start)
@@ -220,7 +235,7 @@ describe('tracePath', () => {
   })
 
   it('path is continuous', () => {
-    const ladder = generateAmida(4)
+    const ladder = generateAmida(4, { randomInt: createSeededRandomInt(100) })
     const path = tracePath(ladder, 0)
 
     for (let i = 1; i < path.length; i++) {
