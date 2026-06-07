@@ -1,20 +1,14 @@
-import { useCallback, useMemo, useRef } from 'react'
-import { useAppContext, useColumnAnimations } from '../hooks'
+import { useCallback, useMemo } from 'react'
+import { useAppContext, useAutoScrollForBall, useColumnAnimations } from '../hooks'
 import { AmidaView } from './AmidaView'
 import { ResultPanel } from './ResultPanel'
 import { generateAmida } from '../lib/amida'
 import { getParticipantColorMap } from '../lib/colors'
 import { PhaseHeader } from './PhaseHeader'
 
-// Auto-scroll constants
-const SCROLL_THROTTLE_MS = 200
-const SCROLL_MARGIN_PX = 200
-const SCROLL_PADDING_PX = 100
-const SCROLL_THRESHOLD_PX = 50
-
 export function RevealPhase() {
   const { state, dispatch } = useAppContext()
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const { scrollContainerRef, handleBallPositionChange, scrollToTop } = useAutoScrollForBall()
 
   // Generate amida once when component mounts
   const amida = useMemo(() => {
@@ -58,40 +52,6 @@ export function RevealPhase() {
     return resultMap
   }, [amida, state.assignments, state.rewards])
 
-  const lastScrollTimeRef = useRef(0)
-  const lastScrollTargetRef = useRef(0)
-
-  const handleBallPositionChange = useCallback((normalizedY: number) => {
-    const container = scrollContainerRef.current
-    if (!container) return
-
-    const svg = container.querySelector('svg')
-    if (!svg) return
-
-    // Throttle scroll updates
-    const now = Date.now()
-    if (now - lastScrollTimeRef.current < SCROLL_THROTTLE_MS) return
-
-    // Calculate where the ball is in the viewport
-    const svgRect = svg.getBoundingClientRect()
-    const ballScreenY = svgRect.top + svgRect.height * normalizedY
-
-    // Check if ball is below visible area
-    const viewportHeight = window.innerHeight
-
-    if (ballScreenY > viewportHeight - SCROLL_MARGIN_PX) {
-      const scrollTarget =
-        window.scrollY + (ballScreenY - viewportHeight + SCROLL_MARGIN_PX + SCROLL_PADDING_PX)
-
-      // Only scroll if target changed significantly
-      if (Math.abs(scrollTarget - lastScrollTargetRef.current) > SCROLL_THRESHOLD_PX) {
-        lastScrollTimeRef.current = now
-        lastScrollTargetRef.current = scrollTarget
-        window.scrollTo({ top: scrollTarget, behavior: 'smooth' })
-      }
-    }
-  }, [])
-
   const handleBack = useCallback(() => {
     dispatch({ type: 'GO_BACK_TO_SELECTION' })
   }, [dispatch])
@@ -99,10 +59,6 @@ export function RevealPhase() {
   const handleReset = useCallback(() => {
     dispatch({ type: 'RESET' })
   }, [dispatch])
-
-  const handleScrollToTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [])
 
   const allRevealed = state.revealedColumns.size === state.participants.length
   const revealedCount = state.revealedColumns.size
@@ -157,7 +113,7 @@ export function RevealPhase() {
       {!allRevealed && !isAnimating && revealedCount > 0 && (
         <div className="flex justify-center">
           <button
-            onClick={handleScrollToTop}
+            onClick={scrollToTop}
             className="px-4 py-2 text-amber-600 hover:text-amber-800 transition-colors flex items-center gap-2 bg-amber-50 rounded-lg"
           >
             <span aria-hidden="true">↑</span>
