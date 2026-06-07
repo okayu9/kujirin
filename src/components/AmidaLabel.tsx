@@ -1,26 +1,24 @@
 import type { KeyboardEvent } from 'react'
 import { LINE_SPACING } from '../lib/layout'
-import { splitTextToLines } from '../lib/text'
+import {
+  LABEL_BOX_HALF_WIDTH,
+  LABEL_BOX_WIDTH,
+  LABEL_SHADOW_OFFSET,
+  getLabelBoxHeight,
+  getLabelLines,
+  getLabelTextOffsetY,
+  type AmidaLabelVariant,
+} from '../lib/amidaLabel'
 
-// Label box dimensions
-const BOX_WIDTH = 70
-const BOX_HALF_WIDTH = BOX_WIDTH / 2
-const SHADOW_OFFSET = 2
 const PARTICIPANT_BORDER_RADIUS = 8
 const REWARD_BORDER_RADIUS = 6
-
-// Vertical padding/offset for text positioning
-const PARTICIPANT_BOX_BASE_HEIGHT = 12
-const REWARD_BOX_BASE_HEIGHT = 8
-const PARTICIPANT_TEXT_OFFSET_Y = 13
-const REWARD_TEXT_OFFSET_Y = 12
 
 interface AmidaLabelProps {
   x: number
   y: number
   text: string
   title: string
-  variant: 'participant' | 'reward'
+  variant: AmidaLabelVariant
   isRevealed?: boolean
   participantColor?: string
   onClick?: () => void
@@ -38,11 +36,10 @@ export function AmidaLabel({
   onClick,
   isClickable = false,
 }: AmidaLabelProps) {
-  const lines = splitTextToLines(text)
+  const lines = getLabelLines(text)
   const isParticipant = variant === 'participant'
-  const baseHeight = isParticipant ? PARTICIPANT_BOX_BASE_HEIGHT : REWARD_BOX_BASE_HEIGHT
-  const boxHeight = baseHeight + lines.length * LINE_SPACING
-  const textStartY = y + (isParticipant ? PARTICIPANT_TEXT_OFFSET_Y : REWARD_TEXT_OFFSET_Y)
+  const boxHeight = getLabelBoxHeight(text, variant)
+  const textStartY = y + getLabelTextOffsetY(variant)
 
   const handleKeyDown = (e: KeyboardEvent<SVGGElement>) => {
     if (isClickable && onClick && (e.key === 'Enter' || e.key === ' ')) {
@@ -72,17 +69,17 @@ export function AmidaLabel({
         <title>{title}</title>
         {/* Shadow */}
         <rect
-          x={x - BOX_HALF_WIDTH + SHADOW_OFFSET}
-          y={y + SHADOW_OFFSET}
-          width={BOX_WIDTH - SHADOW_OFFSET * 2}
+          x={x - LABEL_BOX_HALF_WIDTH + LABEL_SHADOW_OFFSET}
+          y={y + LABEL_SHADOW_OFFSET}
+          width={LABEL_BOX_WIDTH - LABEL_SHADOW_OFFSET * 2}
           height={boxHeight}
           rx={PARTICIPANT_BORDER_RADIUS}
           fill="rgba(0,0,0,0.1)"
         />
         <rect
-          x={x - BOX_HALF_WIDTH}
+          x={x - LABEL_BOX_HALF_WIDTH}
           y={y}
-          width={BOX_WIDTH}
+          width={LABEL_BOX_WIDTH}
           height={boxHeight}
           rx={PARTICIPANT_BORDER_RADIUS}
           fill={fillColor}
@@ -105,9 +102,9 @@ export function AmidaLabel({
     <g>
       <title>{title}</title>
       <rect
-        x={x - BOX_HALF_WIDTH}
+        x={x - LABEL_BOX_HALF_WIDTH}
         y={y}
-        width={BOX_WIDTH}
+        width={LABEL_BOX_WIDTH}
         height={boxHeight}
         rx={REWARD_BORDER_RADIUS}
         fill="#f0fdf4"
