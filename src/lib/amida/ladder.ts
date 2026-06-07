@@ -116,68 +116,59 @@ export interface PathSegment {
   direction: 'down' | 'left' | 'right'
 }
 
+function getPathSegment(
+  rungsByRow: Map<number, Rung[]>,
+  row: number,
+  currentColumn: number
+): PathSegment {
+  const rowRungs = rungsByRow.get(row) || []
+  const rung = rowRungs.find(
+    (r) => r.column === currentColumn || r.column === currentColumn - 1
+  )
+
+  if (!rung) {
+    return {
+      startColumn: currentColumn,
+      endColumn: currentColumn,
+      row,
+      direction: 'down',
+    }
+  }
+
+  if (rung.column === currentColumn) {
+    return {
+      startColumn: currentColumn,
+      endColumn: currentColumn + 1,
+      row,
+      direction: 'right',
+    }
+  }
+
+  return {
+    startColumn: currentColumn,
+    endColumn: currentColumn - 1,
+    row,
+    direction: 'left',
+  }
+}
+
 export function tracePath(ladder: LadderData, startColumn: number): PathSegment[] {
   const segments: PathSegment[] = []
   let currentColumn = startColumn
   const rungsByRow = buildRungsByRow(ladder.rungs)
 
   for (let row = 0; row < ladder.rows; row++) {
-    const rowRungs = rungsByRow.get(row) || []
-    const rung = rowRungs.find(
-      (r) => r.column === currentColumn || r.column === currentColumn - 1
-    )
-
-    if (rung) {
-      if (rung.column === currentColumn) {
-        segments.push({
-          startColumn: currentColumn,
-          endColumn: currentColumn + 1,
-          row,
-          direction: 'right',
-        })
-        currentColumn = currentColumn + 1
-      } else {
-        segments.push({
-          startColumn: currentColumn,
-          endColumn: currentColumn - 1,
-          row,
-          direction: 'left',
-        })
-        currentColumn = currentColumn - 1
-      }
-    } else {
-      segments.push({
-        startColumn: currentColumn,
-        endColumn: currentColumn,
-        row,
-        direction: 'down',
-      })
-    }
+    const segment = getPathSegment(rungsByRow, row, currentColumn)
+    segments.push(segment)
+    currentColumn = segment.endColumn
   }
 
   return segments
 }
 
 export function getEndColumn(ladder: LadderData, startColumn: number): number {
-  let currentColumn = startColumn
-  const rungsByRow = buildRungsByRow(ladder.rungs)
-
-  for (let row = 0; row < ladder.rows; row++) {
-    const rowRungs = rungsByRow.get(row) || []
-    const rung = rowRungs.find(
-      (r) => r.column === currentColumn || r.column === currentColumn - 1
-    )
-
-    if (rung) {
-      if (rung.column === currentColumn) {
-        currentColumn = currentColumn + 1
-      } else {
-        currentColumn = currentColumn - 1
-      }
-    }
-  }
-
-  return currentColumn
+  const segments = tracePath(ladder, startColumn)
+  return segments.at(-1)?.endColumn ?? startColumn
 }
 
 export function validateLadder(ladder: LadderData): LadderValidationResult {
