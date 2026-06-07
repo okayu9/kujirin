@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useAppContext } from '../hooks'
 import { fisherYatesShuffle } from '../lib/amida'
+import { createAssignmentsFromParticipants, getAssignedParticipants } from '../lib/assignments'
 import { AmidaPreview } from './AmidaPreview'
 import { AssignmentModal } from './AssignmentModal'
 import { PhaseHeader } from './PhaseHeader'
@@ -12,7 +13,7 @@ export function SelectionPhase() {
   const allAssigned = state.assignments.size === state.participants.length
 
   const assignedParticipants = useMemo(() => {
-    return new Set(state.assignments.values())
+    return getAssignedParticipants(state.assignments)
   }, [state.assignments])
 
   const handleColumnClick = useCallback((columnIndex: number) => {
@@ -48,13 +49,7 @@ export function SelectionPhase() {
 
   const handleRandomAssign = useCallback(() => {
     const shuffled = fisherYatesShuffle(state.participants)
-
-    const newAssignments = new Map<number, string>()
-    shuffled.forEach((participant, index) => {
-      newAssignments.set(index, participant)
-    })
-
-    dispatch({ type: 'ASSIGN_RANDOM', payload: newAssignments })
+    dispatch({ type: 'ASSIGN_RANDOM', payload: createAssignmentsFromParticipants(shuffled) })
   }, [dispatch, state.participants])
 
   const handleBack = useCallback(() => {
