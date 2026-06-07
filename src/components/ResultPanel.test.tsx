@@ -48,17 +48,17 @@ describe('ResultPanel', () => {
 
   it('shows copy button when results are revealed', () => {
     render(<ResultPanel {...defaultProps} revealedColumns={new Set([0])} />)
-    expect(screen.getByText('📋 コピー')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'コピー' })).toBeInTheDocument()
   })
 
   it('does not show copy button when no results revealed', () => {
     render(<ResultPanel {...defaultProps} revealedColumns={new Set()} />)
-    expect(screen.queryByText('📋 コピー')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'コピー' })).not.toBeInTheDocument()
   })
 
   it('copies results to clipboard on button click', async () => {
     render(<ResultPanel {...defaultProps} revealedColumns={new Set([0, 1])} />)
-    const copyButton = screen.getByText('📋 コピー')
+    const copyButton = screen.getByRole('button', { name: 'コピー' })
     fireEvent.click(copyButton)
     expect(mockClipboard.writeText).toHaveBeenCalledWith('Alice → 賞品A\nBob → 賞品B')
   })

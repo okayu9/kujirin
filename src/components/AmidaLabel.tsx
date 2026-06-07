@@ -66,6 +66,7 @@ export function AmidaLabel({
         onKeyDown={isClickable ? handleKeyDown : undefined}
         className={isClickable ? 'cursor-pointer' : ''}
         role={isClickable ? 'button' : undefined}
+        aria-label={isClickable ? `${title}のくじを引く` : undefined}
         tabIndex={isClickable ? 0 : undefined}
       >
         <title>{title}</title>

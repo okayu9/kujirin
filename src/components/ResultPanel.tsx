@@ -50,7 +50,7 @@ export function ResultPanel({
     <div className="bg-gradient-card border-2 border-amber-200 rounded-2xl p-5 card-shadow">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-bold text-gray-800 flex items-center gap-2">
-          <span className="text-xl">🏆</span>
+          <span className="text-xl" aria-hidden="true">🏆</span>
           結果発表
         </h3>
         {hasRevealedResults && (
@@ -58,14 +58,14 @@ export function ResultPanel({
             onClick={handleCopy}
             className="px-4 py-2 text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg transition-colors font-medium flex items-center gap-1"
           >
-            📋 コピー
+            <span aria-hidden="true">📋</span> コピー
           </button>
         )}
       </div>
 
       {!hasRevealedResults ? (
         <div className="text-center py-8">
-          <div className="text-4xl mb-3">🎋</div>
+          <div className="text-4xl mb-3" aria-hidden="true">🎋</div>
           <p className="text-gray-500">
             上の参加者ラベルをクリックして<br />
             くじを引いてみましょう

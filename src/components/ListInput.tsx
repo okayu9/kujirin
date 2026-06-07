@@ -43,7 +43,7 @@ export function ListInput({
   return (
     <div className="flex flex-col gap-2">
       <label htmlFor={textareaId} className="flex items-center gap-2 font-bold text-gray-700">
-        {icon && <span className="text-lg">{icon}</span>}
+        {icon && <span className="text-lg" aria-hidden="true">{icon}</span>}
         {label}
       </label>
       <div className="flex border-2 border-amber-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-orange-400 focus-within:border-orange-400 bg-white shadow-sm">

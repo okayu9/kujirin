@@ -134,8 +134,8 @@ export function RevealPhase() {
             onClick={startAllAnimations}
             disabled={isAnimating}
             className="px-8 py-3 bg-gradient-success text-white rounded-xl font-bold shadow-lg btn-hover-lift disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-          >
-            🚀 全員一斉スタート
+        >
+            <span aria-hidden="true">🚀</span> 全員一斉スタート
           </button>
         </div>
       )}
@@ -162,7 +162,7 @@ export function RevealPhase() {
             onClick={handleScrollToTop}
             className="px-4 py-2 text-amber-600 hover:text-amber-800 transition-colors flex items-center gap-2 bg-amber-50 rounded-lg"
           >
-            <span>↑</span>
+            <span aria-hidden="true">↑</span>
             <span>上に戻って続きを引く</span>
           </button>
         </div>
@@ -180,13 +180,13 @@ export function RevealPhase() {
           onClick={handleBack}
           className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors"
         >
-          ← 戻る
+          <span aria-hidden="true">←</span> 戻る
         </button>
         <button
           onClick={handleReset}
           className="px-8 py-3 bg-gradient-primary text-white rounded-xl font-bold shadow-lg btn-hover-lift"
         >
-          新しいくじを作る 🎋
+          新しいくじを作る <span aria-hidden="true">🎋</span>
         </button>
       </div>
     </div>

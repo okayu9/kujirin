@@ -97,7 +97,7 @@ export function InputPhase() {
           <ul className="text-red-600 text-sm space-y-1">
             {validation.generalErrors.map((error, i) => (
               <li key={i} className="flex items-center gap-2">
-                <span>⚠️</span>
+                <span aria-hidden="true">⚠️</span>
                 {error.message}
               </li>
             ))}
@@ -110,7 +110,7 @@ export function InputPhase() {
           onClick={handleNext}
           className="px-8 py-3 bg-gradient-primary text-white rounded-xl font-bold shadow-lg btn-hover-lift"
         >
-          次へ進む →
+          次へ進む <span aria-hidden="true">→</span>
         </button>
       </div>
     </div>

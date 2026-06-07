@@ -26,7 +26,7 @@ function App() {
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl card-shadow-lg p-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-2xl">🎋</span>
+                <span className="text-2xl" aria-hidden="true">🎋</span>
               </div>
               <div>
                 <h1 className="text-3xl font-bold title-gradient">くじりん</h1>

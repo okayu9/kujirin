@@ -93,6 +93,21 @@ describe('AmidaLabel', () => {
       const g = container.querySelector('g')
       expect(g).toHaveClass('cursor-pointer')
     })
+
+    it('adds an accessible name when clickable', () => {
+      const { container } = renderInSvg(
+        <AmidaLabel
+          x={100}
+          y={10}
+          text="Alice"
+          title="Alice"
+          variant="participant"
+          isClickable={true}
+        />
+      )
+      const g = container.querySelector('g')
+      expect(g).toHaveAttribute('aria-label', 'Aliceのくじを引く')
+    })
   })
 
   describe('reward variant', () => {

@@ -86,7 +86,7 @@ export function SelectionPhase() {
           onClick={handleRandomAssign}
           className="px-4 py-2 text-sm bg-gradient-secondary text-white rounded-lg font-medium shadow btn-hover-lift"
         >
-          🎲 シャッフル
+          <span aria-hidden="true">🎲</span> シャッフル
         </button>
       </div>
 
@@ -104,14 +104,14 @@ export function SelectionPhase() {
           onClick={handleBack}
           className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors"
         >
-          ← 戻る
+          <span aria-hidden="true">←</span> 戻る
         </button>
         <button
           onClick={handleProceed}
           disabled={!allAssigned}
           className="px-8 py-3 bg-gradient-success text-white rounded-xl font-bold shadow-lg btn-hover-lift disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          くじを引く 🎋
+          くじを引く <span aria-hidden="true">🎋</span>
         </button>
       </div>
 
