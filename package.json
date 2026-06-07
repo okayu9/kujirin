@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:dist-size": "node scripts/check-dist-size.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.29.0",

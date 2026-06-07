@@ -8,6 +8,9 @@ Webブラウザで動作するあみだくじアプリ。シングルHTMLファ�
 # 依存パッケージのインストール
 npm install
 
+# CI と同じ依存解決で確認する場合
+npm ci
+
 # 開発サーバー起動
 npm run dev
 
@@ -22,6 +25,9 @@ npm run typecheck
 
 # Lint
 npm run lint
+
+# 単一HTMLのサイズチェック（npm run build 後）
+npm run check:dist-size
 ```
 
 ## 技術スタック
