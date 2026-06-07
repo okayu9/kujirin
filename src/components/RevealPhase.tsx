@@ -4,6 +4,7 @@ import { AmidaView } from './AmidaView'
 import { ResultPanel } from './ResultPanel'
 import { generateAmida } from '../lib/amida'
 import { getParticipantColorMap } from '../lib/colors'
+import { PhaseHeader } from './PhaseHeader'
 
 // Auto-scroll constants
 const SCROLL_THROTTLE_MS = 200
@@ -109,23 +110,20 @@ export function RevealPhase() {
 
   return (
     <div className="space-y-6">
-      {/* Section Header */}
-      <div className="flex items-center gap-3 pb-4 border-b border-amber-200">
-        <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center text-white font-bold shadow">
-          3
-        </div>
-        <div className="flex-1">
-          <h2 className="text-lg font-bold text-gray-800">運命の分かれ道</h2>
-          <p className="text-sm text-gray-500">
+      <PhaseHeader
+        step={3}
+        title="運命の分かれ道"
+        description={
+          <>
             参加者をクリックしてくじを引こう
             {totalCount > 0 && (
               <span className="ml-2 text-amber-600">
                 ({revealedCount}/{totalCount}人完了)
               </span>
             )}
-          </p>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* 全員スタートボタン */}
       {!allRevealed && (

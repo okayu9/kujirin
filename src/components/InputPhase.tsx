@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useAppContext } from '../hooks'
 import { ListInput } from './ListInput'
 import { validateLists, findDuplicates } from '../lib/validation'
+import { PhaseHeader } from './PhaseHeader'
 
 export function InputPhase() {
   const { state, dispatch } = useAppContext()
@@ -60,16 +61,11 @@ export function InputPhase() {
 
   return (
     <div className="space-y-6">
-      {/* Section Header */}
-      <div className="flex items-center gap-3 pb-4 border-b border-amber-200">
-        <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center text-white font-bold shadow">
-          1
-        </div>
-        <div>
-          <h2 className="text-lg font-bold text-gray-800">参加者とゴールを入力</h2>
-          <p className="text-sm text-gray-500">くじを引く人と、当たりの内容を決めましょう</p>
-        </div>
-      </div>
+      <PhaseHeader
+        step={1}
+        title="参加者とゴールを入力"
+        description="くじを引く人と、当たりの内容を決めましょう"
+      />
 
       <div className="grid md:grid-cols-2 gap-6">
         <ListInput
