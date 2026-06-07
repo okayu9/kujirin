@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState, useMemo } from 'react'
 import type { LadderData } from '../lib/amida'
-import { COLUMN_WIDTH, PADDING_X, LABEL_HEIGHT, ROW_HEIGHT } from '../lib/layout'
+import { VERTICAL_LINE_START_Y, getColumnX, getRungY } from '../lib/layout'
 
 interface BallAnimationProps {
   ladder: LadderData
@@ -38,12 +38,8 @@ export function BallAnimation({
 
   // Calculate path once
   const { path, segmentLengths, totalLength } = useMemo(() => {
-    const getColumnX = (col: number) =>
-      PADDING_X + col * COLUMN_WIDTH + COLUMN_WIDTH / 2
-
-    const startY = LABEL_HEIGHT + 10
-    const endY = LABEL_HEIGHT + 10 + lineHeight
-    const getRungY = (row: number) => LABEL_HEIGHT + 30 + row * ROW_HEIGHT
+    const startY = VERTICAL_LINE_START_Y
+    const endY = VERTICAL_LINE_START_Y + lineHeight
 
     // Group rungs by row
     const rungsByRow = new Map<number, { column: number }[]>()

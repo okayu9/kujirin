@@ -4,10 +4,15 @@ import { AmidaLabel } from './AmidaLabel'
 import { BallAnimation } from './BallAnimation'
 import { shouldUseColors } from '../lib/colors'
 import {
-  COLUMN_WIDTH,
-  PADDING_X,
   LABEL_HEIGHT,
-  ROW_HEIGHT,
+  VERTICAL_LINE_START_Y,
+  getAmidaLineHeight,
+  getAmidaRowCount,
+  getAmidaSvgHeight,
+  getAmidaSvgWidth,
+  getColumnX,
+  getRewardLabelY,
+  getRungY,
 } from '../lib/layout'
 
 interface AmidaViewProps {
@@ -23,11 +28,6 @@ interface AmidaViewProps {
   onBallPositionChange?: (normalizedY: number) => void // 0-1 range
 }
 
-const MIN_ROWS = 6
-
-const getColumnX = (index: number) =>
-  PADDING_X + index * COLUMN_WIDTH + COLUMN_WIDTH / 2
-
 export function AmidaView({
   ladder,
   rewards,
@@ -41,11 +41,10 @@ export function AmidaView({
   onBallPositionChange,
 }: AmidaViewProps) {
   const columnCount = rewards.length
-  const rowCount = Math.max(ladder.rows, MIN_ROWS)
-
-  const svgWidth = columnCount * COLUMN_WIDTH + PADDING_X * 2
-  const lineHeight = rowCount * ROW_HEIGHT + 40
-  const svgHeight = lineHeight + LABEL_HEIGHT * 2 + 40
+  const rowCount = getAmidaRowCount(ladder.rows)
+  const svgWidth = getAmidaSvgWidth(columnCount)
+  const lineHeight = getAmidaLineHeight(rowCount)
+  const svgHeight = getAmidaSvgHeight(lineHeight)
 
   return (
     <svg
@@ -96,9 +95,9 @@ export function AmidaView({
             {/* Vertical line */}
             <line
               x1={x}
-              y1={LABEL_HEIGHT + 10}
+              y1={VERTICAL_LINE_START_Y}
               x2={x}
-              y2={LABEL_HEIGHT + 10 + lineHeight}
+              y2={VERTICAL_LINE_START_Y + lineHeight}
               stroke="#92400e"
               strokeWidth={3}
               strokeLinecap="round"
@@ -107,7 +106,7 @@ export function AmidaView({
             {/* Bottom label (reward) */}
             <AmidaLabel
               x={x}
-              y={LABEL_HEIGHT + lineHeight + 18}
+              y={getRewardLabelY(lineHeight)}
               text={rewards[i]}
               title={rewards[i]}
               variant="reward"
@@ -118,7 +117,7 @@ export function AmidaView({
 
       {/* Horizontal rungs */}
       {ladder.rungs.map((rung, index) => {
-        const y = LABEL_HEIGHT + 30 + rung.row * ROW_HEIGHT
+        const y = getRungY(rung.row)
         const x1 = getColumnX(rung.column)
         const x2 = getColumnX(rung.column + 1)
         return (
@@ -157,7 +156,7 @@ export function AmidaView({
         // Compute final column position
         const endColumn = getEndColumn(ladder, startColumn)
         const x = getColumnX(endColumn)
-        const y = LABEL_HEIGHT + 10 + lineHeight
+        const y = VERTICAL_LINE_START_Y + lineHeight
 
         return (
           <g key={`completed-${startColumn}`}>
