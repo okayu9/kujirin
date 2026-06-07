@@ -37,3 +37,11 @@ npm run check:dist-size
 - Tailwind CSS
 - Framer Motion
 - Vite + vite-plugin-singlefile
+
+## ライセンス
+
+ISC License
+
+Copyright (c) 2026 Yumeto Inaoka
+
+詳細は [LICENSE](LICENSE) を参照してください。
