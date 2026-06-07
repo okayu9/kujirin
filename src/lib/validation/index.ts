@@ -1,3 +1,5 @@
+import { countGraphemes } from '../text'
+
 export interface ValidationError {
   line?: number
   message: string
@@ -61,7 +63,7 @@ export function parseAndValidateList(
       continue
     }
 
-    if (trimmed.length > MAX_ITEM_LENGTH) {
+    if (countGraphemes(trimmed) > MAX_ITEM_LENGTH) {
       errors.push({
         line: lineNum,
         message: `${MAX_ITEM_LENGTH}文字以内にしてください`,

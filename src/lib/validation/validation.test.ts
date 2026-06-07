@@ -82,6 +82,14 @@ describe('parseAndValidateList', () => {
     expect(result.valid).toBe(true)
   })
 
+  it('counts grapheme clusters for item length validation', () => {
+    const result = parseAndValidateList('12345678901😀\nAB', {
+      allowDuplicates: false,
+      listName: 'テスト',
+    })
+    expect(result.valid).toBe(true)
+  })
+
   it('requires minimum 2 items', () => {
     const result = parseAndValidateList('Alice', {
       allowDuplicates: false,
